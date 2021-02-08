@@ -3,6 +3,17 @@ import ReactDOM from 'react-dom';
 import './styles/index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import {
+  ApolloProvider,
+  ApolloClient,
+  createHttpLink,
+  InMemoryCache
+} from '@apollo/client';
+
+//connects ApolloClient with GraphQL server
+const httpLink = createHttpLink({
+  uri: 'http://localhost:4000'
+});
 
 ReactDOM.render(
   <React.StrictMode>
