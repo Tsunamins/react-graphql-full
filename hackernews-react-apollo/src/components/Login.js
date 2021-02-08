@@ -1,5 +1,35 @@
+
 import React, { useState } from 'react';
+import { gql, useMutation } from '@apollo/client';
 import { useHistory } from 'react-router';
+import { AUTH_TOKEN } from '../constants';
+
+const SIGNUP_MUTATION = gql`
+  mutation SignupMutation(
+    $email: String!
+    $password: String!
+    $name: String!
+  ) {
+    signup(
+      email: $email
+      password: $password
+      name: $name
+    ) {
+      token
+    }
+  }
+`;
+
+const LOGIN_MUTATION = gql`
+  mutation LoginMutation(
+    $email: String!
+    $password: String!
+  ) {
+    login(email: $email, password: $password) {
+      token
+    }
+  }
+`;
 
 const Login = () => {
   const history = useHistory();
@@ -10,11 +40,31 @@ const Login = () => {
     name: ''
   });
 
+  const [login] = useMutation(LOGIN_MUTATION, {
+    variables: {
+      email: formState.email,
+      password: formState.password
+    },
+    onCompleted: ({ login }) => {
+      localStorage.setItem(AUTH_TOKEN, login.token);
+      history.push('/');
+    }
+  });
+
+  const [signup] = useMutation(SIGNUP_MUTATION, {
+    variables: {
+      name: formState.name,
+      email: formState.email,
+      password: formState.password
+    },
+    onCompleted: ({ signup }) => {
+      localStorage.setItem(AUTH_TOKEN, signup.token);
+      history.push('/');
+    }
+  });
   return (
     <div>
-      <h4 className="mv3">
-        {formState.login ? 'Login' : 'Sign Up'}
-      </h4>
+      <h4 className="mv3">{login ? 'Login' : 'Sign Up'}</h4>
       <div className="flex flex-column">
         {!formState.login && (
           <input
@@ -55,7 +105,7 @@ const Login = () => {
       <div className="flex mt3">
         <button
           className="pointer mr2 button"
-          onClick={() => console.log('onClick')}
+          onClick={formState.login ? login : signup}
         >
           {formState.login ? 'login' : 'create account'}
         </button>
